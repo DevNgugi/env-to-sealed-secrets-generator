@@ -98,12 +98,11 @@ def index():
             return render_template("index.html", namespaces=namespaces, error_message=validation_error)
 
         # Save env content to a temp file
-        env_file_name = secret_name
-        env_file_path = os.path.join(UPLOAD_FOLDER, env_file_name)
+    
+        env_file_path = os.path.join(UPLOAD_FOLDER, secret_name)
         with open(env_file_path, "w") as f:
             f.write(env_content)
 
-        secret_name = f"{env_file_name}-secret"
         secret_yaml_path = os.path.join(UPLOAD_FOLDER, f"{secret_name}.yaml")
         sealed_yaml_path = os.path.join(UPLOAD_FOLDER, f"{secret_name}-sealed.yaml")
 
@@ -134,7 +133,6 @@ def index():
                 sealed_secret_yaml = yaml.safe_load(sealed_yaml_file)
 
             sealed_yaml_filename = os.path.basename(sealed_yaml_path)
-            print(sealed_yaml_filename,'*******************')
 
             return render_template(
                     "sealed_secret.html",
