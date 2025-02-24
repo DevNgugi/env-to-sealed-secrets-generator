@@ -62,23 +62,6 @@ Then, **open your browser** and go to:
   kubectl apply -f your-sealed-secret.yaml -n your-namespace
   ```
 
----
-
-## ❗ Troubleshooting
-
-### "❌ The following tools are missing: kubectl, kubeseal"
-- Ensure they are installed **and in your system PATH**.
-- Restart your terminal and try again.
-
-### "⚠️ Invalid `.env` file format"
-- Ensure there are **no spaces around `=` signs**.
-- Example of a valid format:
-  ```env
-  API_KEY=mysecretkey
-  DB_PASSWORD=supersecurepassword
-  ```
-
----
 
 ## 📜 License
 This project is **open-source** and available under the MIT License.
