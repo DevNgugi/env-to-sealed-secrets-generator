@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Missing Dependencies</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-red-100 flex justify-center items-center h-screen">
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center w-2/3">
+        <h2 class="text-2xl font-bold text-red-600">⚠️ Missing Dependencies</h2>
+        <p class="mt-4 text-gray-700">
+            {{ error_message|safe }}
+        </p>
+        <a href="/" class="mt-6 inline-block bg-blue-500 text-white px-4 py-2 rounded">
+            🔄 Retry
+        </a>
+    </div>
+</body>
+</html>

@@ -19,6 +19,17 @@ def get_kubernetes_namespaces():
         return namespaces
     except Exception:
         return ["default"]  # Fallback if unable to connect to cluster
+def check_dependencies():
+    """Check if kubectl and kubeseal are in the system PATH."""
+    missing_tools = []
+    
+    if not shutil.which("kubectl"):
+        missing_tools.append("kubectl")
+    
+    if not shutil.which("kubeseal"):
+        missing_tools.append("kubeseal")
+
+    return missing_tools
 
 # Validate .env content
 def validate_env(env_content):
@@ -40,6 +51,21 @@ def validate_env(env_content):
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    missing_tools = check_dependencies()
+    
+    if missing_tools:
+        error_message = (
+            f"❌ The following tools are missing: {', '.join(missing_tools)}.<br>"
+            "Please install them and ensure they are in your system PATH.<br><br>"
+            "<strong>Installation Guide:</strong><br>"
+            "<code>sudo apt install kubectl</code> (Ubuntu/Debian)<br>"
+            "<code>brew install kubectl</code> (MacOS)<br>"
+            "<code>choco install kubectl</code> (Windows)<br><br>"
+            "<code>curl -LO https://github.com/bitnami-labs/sealed-secrets/releases/latest/download/kubeseal-linux-amd64</code><br>"
+            "<code>sudo install -m 755 kubeseal-linux-amd64 /usr/local/bin/kubeseal</code>"
+        )
+        return render_template("error.html", error_message=error_message)
+
     namespaces = get_kubernetes_namespaces()
 
     if request.method == "POST":
