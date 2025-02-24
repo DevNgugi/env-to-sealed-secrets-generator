@@ -121,10 +121,10 @@ def index():
 
             # Seal the Secret
             with open(secret_yaml_path, "rb") as secret_yaml:
+
                 subprocess.run(
-                    ["kubeseal", "--format", "yaml"],
-                    stdin=secret_yaml,
-                    stdout=open(sealed_yaml_path, "w"),
+                    f"cat {secret_yaml_path} | kubeseal --format yaml > {sealed_yaml_path}",
+                    shell=True,
                     check=True,
                 )
 
