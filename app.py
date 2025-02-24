@@ -85,9 +85,12 @@ def index():
     if request.method == "POST":
         env_content = request.form.get("env_content", "").strip()
         namespace = request.form.get("namespace", "default")
+        secret_name=request.form.get("secret_name")
 
         if not env_content:
             return "❌ Error: No input provided", 400
+        if not secret_name:
+            return "❌ Error: Secret Name Provided", 400
 
         # Validate env input
         validation_error = validate_env(env_content)
@@ -95,7 +98,7 @@ def index():
             return render_template("index.html", namespaces=namespaces, error_message=validation_error)
 
         # Save env content to a temp file
-        env_file_name = "custom-env"
+        env_file_name = secret_name
         env_file_path = os.path.join(UPLOAD_FOLDER, env_file_name)
         with open(env_file_path, "w") as f:
             f.write(env_content)
@@ -110,7 +113,8 @@ def index():
                 [
                     "kubectl", "create", "secret", "generic", secret_name,
                     f"--from-file={env_file_path}",
-                    "--dry-run=client", "-o", "yaml"
+                    "--dry-run=client", "-o", "yaml",
+                    "-n", namespace  # Add namespace flag
                 ],
                 check=True,
                 stdout=open(secret_yaml_path, "w"),
@@ -129,9 +133,14 @@ def index():
             with open(sealed_yaml_path, "r") as sealed_yaml_file:
                 sealed_secret_yaml = yaml.safe_load(sealed_yaml_file)
 
+            sealed_yaml_filename = os.path.basename(sealed_yaml_path)
+            print(sealed_yaml_filename,'*******************')
+
             return render_template(
-                "sealed_secret.html", sealed_secret=sealed_secret_yaml, download_file=sealed_yaml_path
-            )
+                    "sealed_secret.html",
+                    sealed_secret=sealed_secret_yaml,
+                    download_file=sealed_yaml_filename  # Pass only the filename
+                )
 
         except subprocess.CalledProcessError as e:
             return f"❌ Error: {str(e)}", 500

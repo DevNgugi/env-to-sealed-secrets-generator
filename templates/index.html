@@ -5,13 +5,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         function validateEnvInput() {
-            
             const textarea = document.getElementById("env_content");
+            const nameInput = document.getElementById("secret_name");
+            const namespaceSelect = document.getElementById("namespace");
             const errorDiv = document.getElementById("error-message");
+
             const lines = textarea.value.split("\n");
             const envPattern = /^[A-Za-z_][A-Za-z0-9_]*=.*$/;
             let seenKeys = new Set();
 
+            // Validate environment variable format
             for (let line of lines) {
                 if (!line.trim() || line.startsWith("#")) continue;
                 if (!envPattern.test(line)) {
@@ -25,12 +28,26 @@
                 }
                 seenKeys.add(key);
             }
-            if (!textarea.value.trim()) {
-                errorDiv.textContent = "❌ Please enter environment variables before submitting."
+
+            // Check if secret name is provided
+            if (!nameInput.value.trim()) {
+                errorDiv.textContent = "❌ Please enter a Secret Name.";
                 return false;
-                event.preventDefault(); // Stop form submission
             }
-            errorDiv.textContent = "";  // Clear errors
+
+            // Ensure namespace is selected
+            if (!namespaceSelect.value) {
+                errorDiv.textContent = "❌ Please select a Namespace.";
+                return false;
+            }
+
+            // Ensure environment variables are not empty
+            if (!textarea.value.trim()) {
+                errorDiv.textContent = "❌ Please enter environment variables before submitting.";
+                return false;
+            }
+
+            errorDiv.textContent = ""; // Clear errors
             return true;
         }
     </script>
@@ -39,13 +56,21 @@
     <div class="bg-white p-6 rounded-lg shadow-lg w-1/2">
         <h2 class="text-2xl font-bold text-center text-gray-800">Sealed Secret Generator</h2>
         <form id="env_form" action="/" method="post" class="mt-4" onsubmit="return validateEnvInput();">
+            
+            <!-- Secret Name Input -->
+            <label class="block text-gray-700 font-medium">Secret Name:</label>
+            <input type="text" id="secret_name" name="secret_name"
+                   class="w-full border p-2 rounded mb-4" placeholder="Enter secret name">
+            
+            <!-- Namespace Selection -->
             <label class="block text-gray-700 font-medium">Namespace:</label>
-            <select name="namespace" class="w-full border p-2 rounded mb-4">
+            <select id="namespace" name="namespace" class="w-full border p-2 rounded mb-4">
                 {% for ns in namespaces %}
                 <option value="{{ ns }}">{{ ns }}</option>
                 {% endfor %}
             </select>
 
+            <!-- .env Content Input -->
             <label class="block text-gray-700 font-medium">Paste .env Content:</label>
             <textarea id="env_content" name="env_content" rows="8" 
                 class="w-full font-mono border p-2 rounded bg-gray-50"
@@ -58,14 +83,14 @@
             </button>
         </form>
     </div>
-    <footer class=" mt-6">
-        &copy; <span class='text-center text-gray-600' id="year"></span> <a style="text-decoration:underline" class="text-blue-400" href="https://github.com/DevNgugi/env-to-sealed-secrets-generator">DevNgugi</a>
+    
+    <footer class="mt-6">
+        &copy; <span class='text-center text-gray-600' id="year"></span> 
+        <a style="text-decoration:underline" class="text-blue-400" href="https://github.com/DevNgugi/env-to-sealed-secrets-generator">DevNgugi</a>
     </footer>
+
     <script>
         document.getElementById("year").textContent = new Date().getFullYear();
-
     </script>
-  
-    
 </body>
 </html>
