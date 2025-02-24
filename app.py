@@ -4,12 +4,24 @@ import yaml
 import re
 from flask import Flask, request, render_template, send_file
 from kubernetes import client, config
+import shutil
+from kubernetes.client.exceptions import ApiException
 
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+def check_kubernetes_connection():
+    try:
+        # Load Kubernetes configuration
+        config.load_kube_config()  # Use load_incluster_config() if running inside a cluster
+        v1 = client.CoreV1Api()
+        v1.list_namespace()  # Try fetching namespaces
+        return True
+    except (ApiException, Exception):
+        return False  # Return False if connection fails
+        
 # Load Kubernetes config and fetch available namespaces
 def get_kubernetes_namespaces():
     try:
@@ -65,6 +77,8 @@ def index():
             "<code>sudo install -m 755 kubeseal-linux-amd64 /usr/local/bin/kubeseal</code>"
         )
         return render_template("error.html", error_message=error_message)
+    if not check_kubernetes_connection():
+        return render_template("error.html", error_message="❌ Unable to connect to Kubernetes. Please check your configuration.")  
 
     namespaces = get_kubernetes_namespaces()
 
