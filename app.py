@@ -93,9 +93,9 @@ def index():
             return "❌ Error: Secret Name Provided", 400
 
         # Validate env input
-        validation_error = validate_env(env_content)
-        if validation_error:
-            return render_template("index.html", namespaces=namespaces, error_message=validation_error)
+        # validation_error = validate_env(env_content)
+        # if validation_error:
+        #     return render_template("index.html", namespaces=namespaces, error_message=validation_error)
 
         # Save env content to a temp file
     
