@@ -3,54 +3,7 @@
 <head>
     <title>Jp Sealed Secret Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        function validateEnvInput() {
-            const textarea = document.getElementById("env_content");
-            const nameInput = document.getElementById("secret_name");
-            const namespaceSelect = document.getElementById("namespace");
-            const errorDiv = document.getElementById("error-message");
-
-            const lines = textarea.value.split("\n");
-            const envPattern = /^[A-Za-z_][A-Za-z0-9_]*=.*$/;
-            let seenKeys = new Set();
-
-            // Validate environment variable format
-            for (let line of lines) {
-                if (!line.trim() || line.startsWith("#")) continue;
-                if (!envPattern.test(line)) {
-                    errorDiv.textContent = "❌ Invalid format: " + line;
-                    return false;
-                }
-                let key = line.split("=")[0];
-                if (seenKeys.has(key)) {
-                    errorDiv.textContent = "❌ Duplicate key: " + key;
-                    return false;
-                }
-                seenKeys.add(key);
-            }
-
-            // Check if secret name is provided
-            if (!nameInput.value.trim()) {
-                errorDiv.textContent = "❌ Please enter a Secret Name.";
-                return false;
-            }
-
-            // Ensure namespace is selected
-            if (!namespaceSelect.value) {
-                errorDiv.textContent = "❌ Please select a Namespace.";
-                return false;
-            }
-
-            // Ensure environment variables are not empty
-            if (!textarea.value.trim()) {
-                errorDiv.textContent = "❌ Please enter environment variables before submitting.";
-                return false;
-            }
-
-            errorDiv.textContent = ""; // Clear errors
-            return true;
-        }
-    </script>
+  
 </head>
 <body class="bg-gray-100 flex flex-col justify-center items-center h-screen">
     <div class="bg-white p-6 rounded-lg shadow-lg w-1/2">
@@ -71,7 +24,11 @@
             </select>
 
             <!-- .env Content Input -->
-            <label class="block text-gray-700 font-medium">Paste .env Content:</label>
+            <label class='text-xs text-gray-400 mb-8'>
+                <input type="checkbox" id="env_checkbox" checked=true >Uncheck this if the input is not a .env)
+            </label> 
+            
+            <label class="block text-gray-700 font-medium">Paste <span id='inputType'>.env</span> Content:</label>
             <textarea id="env_content" name="env_content" rows="8" 
                 class="w-full font-mono border p-2 rounded bg-gray-50"
                 oninput="validateEnvInput()"></textarea>
@@ -88,9 +45,75 @@
         &copy; <span class='text-center text-gray-600' id="year"></span> 
         <a style="text-decoration:underline" class="text-blue-400" href="https://github.com/DevNgugi/env-to-sealed-secrets-generator">DevNgugi</a>
     </footer>
-
     <script>
+        let errorDiv = document.getElementById("error-message");
+        let textarea = document.getElementById("env_content");
+        let nameInput = document.getElementById("secret_name");
+        let namespaceSelect = document.getElementById("namespace");
+        let checkbox = document.getElementById('env_checkbox');
+        let inputType = document.getElementById('inputType');
+
+
         document.getElementById("year").textContent = new Date().getFullYear();
+        document.addEventListener("DOMContentLoaded", function() {
+            checkbox.addEventListener("change", function() {
+                inputType.textContent = checkbox.checked ? '.env' : '';
+            });
+
+        
+        });
+        function validateEnvInput() {
+           
+            errorDiv.textContent = ""; // Clear previous errors
+    
+            if (!nameInput.value.trim()) {
+                errorDiv.textContent = "❌ Please enter a Secret Name.";
+                return false;
+            }
+    
+            if (!namespaceSelect.value) {
+                errorDiv.textContent = "❌ Please select a Namespace.";
+                return false;
+            }
+    
+            if (!textarea.value.trim()) {
+                errorDiv.textContent = "❌ Please enter the secret to be encrypted.";
+                return false;
+            }
+    
+            if (checkbox.checked) {
+                if (!validateEnv()) {
+                    return false; // Stop execution if .env validation fails
+                }
+            }
+    
+            return true; // Validation passed
+        }
+    
+        function validateEnv() {         
+            const lines = textarea.value.split("\n");
+            const envPattern = /^[A-Za-z_][A-Za-z0-9_]*=.*$/;
+            let seenKeys = new Set();
+    
+            for (let line of lines) {
+                if (!line.trim() || line.startsWith("#")) continue;
+    
+                if (!envPattern.test(line)) {
+                    errorDiv.textContent = "❌ Invalid format for .env: " + line;
+                    return false;
+                }
+    
+                let key = line.split("=")[0].trim();
+                if (seenKeys.has(key)) {
+                    errorDiv.textContent = "❌ Duplicate .env key: " + key;
+                    return false;
+                }
+    
+                seenKeys.add(key);
+            }
+    
+            return true; // Validation passed
+        }
     </script>
 </body>
 </html>
